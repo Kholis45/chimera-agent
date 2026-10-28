@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Chimera Agent – Local‑first AI Agent Engine (GUI + CLI)</title>
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description"
+      content="Chimera Agent – a lean, local‑first AI agent engine with a native Tauri desktop app and a zero‑dependency CLI. Download for Windows, macOS, Linux.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   ============================================================ */
+:root{
+  --bg:#0d1117;                 /* charcoal */
+  --bg-elev:#161b22;
+  --card:#1c2128;
+  --border:#30363d;
+  --fg:#e6edf3;
+  --fg-muted:#8b949e;
+  --accent:#ff6b00;             /* electric orange */
+  --accent-hover:#ff8c33;
+  --accent-glow:rgba(255,107,0,.35);
+  --glass:rgba(255,255,255,.04);
+  --glass-border:rgba(255,255,255,.08);
+  --radius:14px;
+  --radius-sm:10px;
+  --shadow:0 12px 40px rgba(0,0,0,.55);
+  --transition:.15s ease;
+  --font-sans:"Inter",system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;
+  --font-mono:"JetBrains Mono",ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;
+}
+
+/* ============================================================
+   RESET & BASE
+   ============================================================ */
+*, *::before, *::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{
+  font-family:var(--font-sans);
+  background:var(--bg);
+  color:var(--fg);
+  line-height:1.6;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+a{color:var(--accent);text-decoration:none}
+a:hover{text-decoration:underline}
+img{display:block;max-width:100%;height:auto}
+code,kbd,pre,samp{font-family:var(--font-mono);font-size:.9em}
+
+/* ============================================================
+   LAYOUT HELPERS
+   ============================================================ */
+.container{
+  width:min(1120px,92%);
+  margin:auto;
+  padding:3.5rem 1.5rem;
+  flex:1;
+  display:flex;
+  flex-direction:column;
+  gap:3rem;
+}
+.section{ }
+.section-head{text-align:center;margin-bottom:2rem}
+.section-head .badge{
+  display:inline-block;
+  font-size:.7rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;
+  color:var(--accent);
+  background:rgba(255,107,0,.12);
+  border:1px solid var(--accent);
+  padding:.2rem .7rem;border-radius:999px;margin-bottom:.8rem
+}
+.section-head h2{
+  font-size:clamp(1.6rem,3.5vw,2.2rem);
+  font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(90deg,var(--fg),var(--accent));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.section-head p{color:var(--fg-muted);max-width:60ch;margin:.5rem auto 0}
+
+/* ============================================================
+   BUTTONS
+   ============================================================ */
+.btn{
+  display:inline-flex;align-items:center;gap:.55rem;
+  font-size:.95rem;font-weight:600;
+  padding:.85rem 1.5rem;border-radius:var(--radius-sm);
+  border:none;cursor:pointer;text-decoration:none;
+  transition:background var(--transition),transform var(--transition),box-shadow var(--transition);
+}
+.btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.btn-primary{
+  background:var(--accent);color:#0d1117;
+}
+.btn-primary:hover{background:var(--accent-hover);transform:translateY(-2px);box-shadow:0 8px 24px var(--accent-glow)}
+.btn-secondary{
+  background:var(--bg-elev);color:var(--fg);
+  border:1px solid var(--border);
+}
+.btn-secondary:hover{background:var(--border);transform:translateY(-2px)}
+.btn-ghost{
+  background:transparent;color:var(--fg-muted);
+  border:1px solid transparent;
+}
+.btn-ghost:hover{color:var(--fg);border-color:var(--border)}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{text-align:center;padding:1rem 0}
+.hero h1{
+  font-size:clamp(2.5rem,6vw,4rem);
+  font-weight:800;letter-spacing:-.02em;
+  background:linear-gradient(90deg,var(--fg),var(--accent));
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  line-height:1.1;
+}
+.hero p{font-size:clamp(1rem,2vw,1.25rem);color:var(--fg-muted);max-width:70ch;margin:1rem auto 0}
+.hero .cta-row{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem;margin-top:2rem}
+
+/* ============================================================
+   DOWNLOAD CARDS (OS)
+   ============================================================ */
+.os-grid{
+  display:grid;gap:1.5rem;
+  grid-template-columns:repeat(auto-fit,minmax(260px,1fr));
+}
+.os-card{
+  background:var(--glass);
+  border:1px solid var(--glass-border);
+  border-radius:var(--radius);
+  padding:2rem 1.5rem;
+  display:flex;flex-direction:column;align-items:center;text-align:center;
+  transition:transform var(--transition),box-shadow var(--transition);
+}
+.os-card:hover{transform:translateY(-4px);box-shadow:var(--shadow)}
+.os-icon{font-size:2.8rem;line-height:1;margin-bottom:.6rem}
+.os-card h3{font-size:1.15rem;font-weight:700;margin-bottom:.3rem}
+.os-card .tag{
+  font-size:.65rem;font-weight:700;letter-spacing:.07em;text-transform:uppercase;
+  color:var(--accent);
+  background:rgba(255,107,0,.12);
+  border:1px solid var(--accent);
+  padding:.15rem .55rem;border-radius:999px;margin-bottom:1rem
+}
+.os-card .meta{font-size:.8rem;color:var(--fg-muted);margin-bottom:1.2rem;line-height:1.5}
+.os-card .btn{width:100%;justify-content:center}
+
+/* ============================================================
+   SPEC TABLE
+   ============================================================ */
+.table-wrap{overflow-x:auto;margin-top:1rem}
+table{
+  width:100%;border-collapse:collapse;font-size:.85rem;
+}
+th,td{
+  padding:.7rem .9rem;text-align:left;border-bottom:1px solid var(--border);
+}
+th{font-weight:600;color:var(--fg-muted);text-transform:uppercase;letter-spacing:.05em;font-size:.7rem}
+tr:hover td{background:var(--glass)}
+td code{background:var(--bg-elev);padding:.1rem .35rem;border-radius:4px}
+
+/* ============================================================
+   CLI SECTION
+   ============================================================ */
+.cli-card{
+  background:var(--glass);border:1px solid var(--glass-border);
+  border-radius:var(--radius);padding:2rem;
+  display:grid;gap:1.5rem;
+  grid-template-columns:1fr;
+}
+@media(min-width:720px){.cli-card{grid-template-columns:1fr 1fr;align-items:start}}
+.cli-card h3{font-size:1.15rem;font-weight:700}
+.cli-card p{color:var(--fg-muted)}
+.code-block{
+  background:#010409;border:1px solid var(--border);
+  border-radius:10px;padding:1.2rem 1.4rem;
+  font-family:var(--font-mono);font-size:.8rem;line-height:1.55;
+  overflow-x:auto;color:#c9d1d9;
+}
+.code-block .prompt{color:var(--accent);font-weight:600}
+.code-block .cmd{color:#d1d9e0}
+
+/* ============================================================
+   SUPPORT / DONATE
+   ============================================================ */
+.support{
+  background:var(--glass);border:1px solid var(--glass-border);
+  border-radius:var(--radius);padding:2.5rem;
+  text-align:center;
+}
+.support h3{font-size:1.25rem;font-weight:700;margin-bottom:.4rem}
+.support p{color:var(--fg-muted);margin-bottom:1.5rem}
+.donate-row{display:flex;flex-wrap:wrap;justify-content:center;gap:1rem}
+.donate-btn{
+  display:inline-flex;align-items:center;gap:.5rem;
+  padding:.75rem 1.4rem;border-radius:var(--radius-sm);
+  font-weight:600;font-size:.9rem;text-decoration:none;
+  border:none;cursor:pointer;
+  transition:transform var(--transition),box-shadow var(--transition);
+}
+.donate-btn:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+.donate-btn:hover{transform:translateY(-2px);box-shadow:0 8px 20px rgba(0,0,0,.45)}
+.donate-btn svg{width:20px;height:20px}
+.saweria{background:#ff6f00;color:#0d1117}
+.saweria:hover{background:#ff8c1a}
+.bmc{background:#ffdd00;color:#0d1117}
+.bmc:hover{background:#ffe633}
+
+/* ============================================================
+   FOOTER
+   ============================================================ */
+footer{
+  background:var(--bg-elev);
+  border-top:1px solid var(--border);
+  padding:2rem 1rem;text-align:center;
+  font-size:.8rem;color:var(--fg-muted);
+}
+footer a{font-weight:500}
+
+/* ============================================================
+   SCROLLBAR
+   ============================================================ */
+::-webkit-scrollbar{width:8px;height:8px}
+::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--border);border-radius:4px}
+::-webkit-scrollbar-thumb:hover{background:var(--fg-muted)}
+</style>
+</head>
+<body>
+
+<div class="container">
+
+  <!-- ============ HERO ============ -->
+  <header class="hero">
+    <span class="badge">v0.1.0 • Lean &amp; Lethal</span>
+    <h1>Chimera Agent</h1>
+    <p>Local‑first AI agent engine &amp; autonomous automation core — native desktop GUI **and** a single‑binary CLI, built with Rust + Tauri.</p>
+
+    <div class="cta-row">
+      <a class="btn btn-primary" href="#download" aria-label="Jump to downloads">⬇️ Get Chimera</a>
+      <a class="btn btn-secondary" href="https://github.com/<YOUR-ORG>/chimera" target="_blank" rel="noopener">View Source on GitHub</a>
+    </div>
+  </header>
+
+  <!-- ============ DOWNLOAD SECTION ============ -->
+  <section id="download" class="section" aria-labelledby="dl-title">
+    <div class="section-head">
+      <span class="badge">Downloads</span>
+      <h2 id="dl-title">Pick your platform</h2>
+      <p>Native installers, signed where possible, zero‑dependency CLI binary for every OS.</p>
+    </div>
+
+    <div class="os-grid">
+
+      <!-- Windows -->
+      <article class="os-card">
+        <div class="os-icon" aria-hidden="true">🪟</div>
+        <span class="tag">Windows 10/11</span>
+        <h3>Desktop GUI Installer</h3>
+        <p class="meta">
+          <strong>.exe (NSIS)</strong> • 45 MB<br>
+          Auto‑updates • Code‑signed (EV) • Frameless glass UI
+        </p>
+        <a class="btn btn-primary" href="https://github.com/<YOUR-ORG>/chimera/releases/latest/download/Chimera-Setup-x64.exe"
+           target="_blank" rel="noopener">Download .exe</a>
+      </article>
+
+      <!-- macOS -->
+      <article class="os-card">
+        <div class="os-icon" aria-hidden="true">🍎</div>
+        <span class="tag">macOS 11+ (Intel & Apple Silicon)</span>
+        <h3>Universal .dmg</h3>
+        <p class="meta">
+          <strong>.dmg</strong> • 48 MB<br>
+          Notarized • Hardened Runtime • Native Apple‑Silicon binary
+        </p>
+        <a class="btn btn-primary" href="https://github.com/<YOUR-ORG>/chimera/releases/latest/download/Chimera-universal.dmg"
+           target="_blank" rel="noopener">Download .dmg</a>
+      </article>
+
+      <!-- Linux -->
+      <article class="os-card">
+        <div class="os-icon" aria-hidden="true">🐧</div>
+        <span class="tag">Linux (glibc 2.31+)</span>
+        <h3>AppImage / .deb / .rpm / Flatpak</h3>
+        <p class="meta">
+          <strong>AppImage</strong> 52 MB • <strong>.deb</strong> 48 MB • <strong>.rpm</strong> 49 MB<br>
+          Works on Ubuntu 22.04+, Fedora 38+, Arch, NixOS, etc.
+        </p>
+        <a class="btn btn-primary" href="https://github.com/<YOUR-ORG>/chimera/releases/latest"
+           target="_blank" rel="noopener">Choose Linux artifact</a>
+      </article>
+
+    </div>
+
+    <!-- Spec table -->
+    <div class="section-head" style="margin-top:2rem">
+      <h2>Quick spec comparison</h2>
+    </div>
+    <div class="table-wrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Feature</th><th>Windows</th><th>macOS</th><th>Linux</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr><td>Installer type</td><td>NSIS .exe (signed)</td><td>Universal .dmg (notarized)</td><td>AppImage / .deb / .rpm / Flatpak</td></tr>
+          <tr><td>Architecture</td><td>x86_64</td><td>x86_64 + arm64 (universal)</td><td>x86_64 (arm64 via Flatpak)</td></tr>
+          <tr><td>Auto‑update</td><td>Built‑in (Tauri updater)</td><td>Built‑in (Sparkle)</td><td>AppImageUpdate / package manager</td></tr>
+          <tr><td>GPU acceleration</td><td>DirectX 12 / Vulkan</td><td>Metal</td><td>Vulkan / OpenGL</td></tr>
+          <tr><td>Sandbox</td><td>AppContainer (optional)</td><td>Hardened Runtime + Entitlements</td><td>Flatpak portal / bubblewrap</td></tr>
+          <tr><td>Minimum OS</td><td>Win 10 1909+</td><td>macOS 11 Big Sur</td><td>glibc 2.31+, kernel 5.10+</td></tr>
+          <tr><td>Size (compressed)</td><td>≈ 45 MB</td><td>≈ 48 MB</td><td>≈ 48‑52 MB</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </section>
+
+  <!-- ============ CLI SECTION ============ -->
+  <section class="section" aria-labelledby="cli-title">
+    <div class="section-head">
+      <span class="badge">CLI</span>
+      <h2 id="cli-title">⚡ Zero‑dependency CLI binary</h2>
+      <p>Same engine, no GUI overhead — perfect for servers, CI, or headless automation.</p>
+    </div>
+
+    <div class="cli-card">
+      <div>
+        <h3>Install via Cargo (recommended)</h3>
+        <p>Requires Rust ≥ 1.78. Compiles a static binary for your host.</p>
+        <div class="code-block"><code><span class="prompt">$ </span><span class="cmd">cargo install chimera-agent --locked</span></code></div>
+
+        <h3 style="margin-top:1.2rem">Or download a pre‑built binary</h3>
+        <p>Grab the <code>chimera-agent</code> file from the <a href="https://github.com/<YOUR-ORG>/chimera/releases/latest" target="_blank" rel="noopener">latest release</a>, make it executable and drop it in <code>$PATH</code>.</p>
+      </div>
+
+      <div>
+        <h3>Quick start</h3>
+        <div class="code-block"><code><span class="prompt"># Show help</span>\n<span class="prompt">$ </span><span class="cmd">chimera-agent --help</span>\n\n<span class="prompt"># Run a DAG from a TOML config</span>\n<span class="prompt">$ </span><span class="cmd">chimera-agent run --config ./my‑pipeline.toml</span>\n\n<span class="prompt"># One‑shot LLM prompt (streaming)</span>\n<span class="prompt">$ </span><span class="cmd">chimera-agent ask \"Summarise the last 5 commits\" --stream</span></code></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ SUPPORT / DONATE ============ -->
+  <section class="section support" aria-labelledby="support-title">
+    <div class="section-head">
+      <h2 id="support-title">☕ Support the Development</h2>
+      <p>Chimera is MIT‑licensed and built in the open. If it saves you time, a coffee or a small donation keeps the engine humming.</p>
+    </div>
+
+    <div class="donate-row">
+      <a class="donate-btn saweria"
+         href="https://saweria.co/roketdesign15"
+         target="_blank" rel="noopener"
+         aria-label="Donate via Saweria">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 17h-2v-2h2v2zm2.07-7.75l-.9.92C13.45 12.9 13 13.5 13 15h-2v-.5c0-1.1.45-2.1 1.17-2.83l1.24-1.26c.37-.36.59-.86.59-1.41 0-1.1-.9-2-2-2s-2 .9-2 2H8c0-2.21 1.79-4 4-4s4 1.79 4 4c0 .88-.36 1.68-.93 2.25z"/></svg>
+        Saweria
+      </a>
+
+      <a class="donate-btn bmc"
+         href="https://buymeacoffee.com/ffkholis89a"
+         target="_blank" rel="noopener"
+         aria-label="Buy Me a Coffee">
+        <svg viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.5 2H5.5C4.12 2 3 3.12 3 4.5v15C3 20.88 4.12 22 5.5 22h13c1.38 0 2.5-1.12 2.5-2.5v-15C21 3.12 19.88 2 18.5 2zM5.5 3h13c.83 0 1.5.67 1.5 1.5v15c0 .83-.67 1.5-1.5 1.5h-13c-.83 0-1.5-.67-1.5-1.5v-15C4 3.67 4.67 3 5.5 3zm4 14.5c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5v-9c0-1.38-1.12-2.5-2.5-2.5s-2.5 1.12-2.5 2.5v9zm6 0c0 1.38 1.12 2.5 2.5 2.5s2.5-1.12 2.5-2.5v-9c0-1.38-1.12-2.5-2.5-2.5s-2.5 1.12-2.5 2.5v9z"/></svg>
+        Buy Me a Coffee
+      </a>
+    </div>
+  </section>
+
+</div>
+
+<!-- ============ FOOTER ============ -->
+<footer>
+  Built with <strong>Rust</strong> &amp; <strong>Tauri 2</strong> by
+  <a href="https://github.com/ffkholis89a" target="_blank" rel="noopener">Kholis</a>.
+  Source code on <a href="https://github.com/<YOUR-ORG>/chimera" target="_blank" rel="noopener">GitHub</a>.
+  &nbsp;•&nbsp; MIT License &nbsp;•&nbsp; <a href="https://github.com/<YOUR-ORG>/chimera/blob/main/CHANGELOG.md" target="_blank" rel="noopener">Changelog</a>
+</footer>
+
+</body>
+</html>

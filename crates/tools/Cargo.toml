@@ -1,0 +1,15 @@
+[package]
+name = "chimera-tools"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
+async-trait = { workspace = true }
+thiserror = "1.0"
+uuid = { version = "1.8", features = ["v4", "serde"] }
+serde_json = "1.0"
+
+[dev-dependencies]
+tempfile = "3.10"

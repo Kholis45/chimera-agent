@@ -1,0 +1,15 @@
+[package]
+name = "chimera-llm-client"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { workspace = true }
+serde = { workspace = true }
+reqwest = { workspace = true }
+async-trait = { workspace = true }
+thiserror = "1.0"
+uuid = { version = "1.8", features = ["v4", "serde"] }
+tokio-util = { version = "0.7", features = ["codec", "io"] }
+tokio-stream = "0.1"
+futures-core = "0.3"

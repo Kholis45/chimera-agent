@@ -1,0 +1,11 @@
+[package]
+name = "chimera-core-engine"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tokio = { workspace = true }
+async-trait = { workspace = true }
+serde = { workspace = true }
+thiserror = "1.0"
+uuid = { version = "1.8", features = ["v4", "serde"] }

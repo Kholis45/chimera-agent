@@ -1,0 +1,18 @@
+[package]
+name = "chimera-tauri-app"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+tauri = { workspace = true }
+tokio = { workspace = true }
+serde = { workspace = true }
+serde_json = "1.0"
+thiserror = "1.0"
+uuid = { version = "1.8", features = ["v4", "serde"] }
+chimera-core-engine = { path = "../core-engine" }
+chimera-llm-client = { path = "../llm-client" }
+chimera-tools = { path = "../tools" }
+
+[build-dependencies]
+tauri-build = { version = "2.0", features = [] }
